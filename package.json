@@ -1,0 +1,27 @@
+{
+  "name": "creator-commerce-backend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node ./node_modules/tsx/dist/cli.mjs watch src/server.ts",
+    "build": "node ./node_modules/typescript/bin/tsc -p tsconfig.json",
+    "start": "node dist/src/server.js",
+    "check": "node ./node_modules/typescript/bin/tsc --noEmit -p tsconfig.json",
+    "db:migrate": "node ./node_modules/tsx/dist/cli.mjs src/scripts/run-sql-migration.ts"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.10",
+    "@types/pg": "^8.15.5",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
