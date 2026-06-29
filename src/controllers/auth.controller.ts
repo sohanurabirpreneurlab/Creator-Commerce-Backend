@@ -7,9 +7,9 @@ import { sendSuccess } from "../utils/api-response.js";
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  public signUp = (request: Request, response: Response) => {
+  public signUp = async (request: Request, response: Response) => {
     const payload = request.body as SignUpPayload;
-    const result = this.authService.signUp(payload);
+    const result = await this.authService.signUp(payload);
 
     return sendSuccess(
       response,
@@ -19,9 +19,9 @@ export class AuthController {
     );
   };
 
-  public login = (request: Request, response: Response) => {
+  public login = async (request: Request, response: Response) => {
     const payload = request.body as LoginPayload;
-    const result = this.authService.login(payload);
+    const result = await this.authService.login(payload);
 
     return sendSuccess(
       response,

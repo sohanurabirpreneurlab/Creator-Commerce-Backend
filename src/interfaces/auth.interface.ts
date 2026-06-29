@@ -26,6 +26,10 @@ export interface AuthUser {
   createdAt: string;
 }
 
+export interface AuthUserRecord extends AuthUser {
+  passwordHash: string | null;
+}
+
 export interface AuthResult {
   user: AuthUser;
   token: string;
