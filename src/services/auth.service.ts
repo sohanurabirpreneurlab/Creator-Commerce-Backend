@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
 import { HTTP_STATUS } from "../constants/http-status.js";
 import { AppError } from "../errors/app-error.js";
+import { UnauthorizedError } from "../errors/unauthorized-error.js";
+import { UserRole } from "../constants/roles.js";
 import {
   AuthResult,
   AuthUser,
@@ -10,7 +12,14 @@ import {
   LoginPayload,
   SignUpPayload,
 } from "../interfaces/auth.interface.js";
+import { CurrentUser } from "../interfaces/current-user.interface.js";
 import { AuthRepository } from "../repositories/auth.repository.js";
+
+type AuthTokenPayload = {
+  id: string;
+  email: string;
+  role: UserRole;
+};
 
 export class AuthService {
   constructor(private readonly authRepository: AuthRepository) {}
@@ -31,6 +40,10 @@ export class AuthService {
     const createdUser = await this.authRepository.create({
       name: payload.name.trim(),
       email: payload.email.trim().toLowerCase(),
+      // Public signup is intentionally restricted to CREATOR.
+      // Brand managers and superadmins should be created or promoted by admin flow later,
+      // or manually during development while that flow does not exist yet.
+      role: UserRole.CREATOR,
       mobileNumber: payload.mobileNumber.trim(),
       address: payload.address.trim(),
       gender: payload.gender.trim(),
@@ -40,7 +53,7 @@ export class AuthService {
 
     return {
       user: this.sanitizeUser(createdUser),
-      token: this.generateToken(createdUser.email),
+      token: this.generateToken(createdUser),
     };
   }
 
@@ -71,7 +84,29 @@ export class AuthService {
 
     return {
       user: this.sanitizeUser(existingUser),
-      token: this.generateToken(existingUser.email),
+      token: this.generateToken(existingUser),
+    };
+  }
+
+  public async getCurrentUserProfile(currentUser: CurrentUser) {
+    const existingUser = await this.authRepository.findById(currentUser.id);
+
+    if (!existingUser) {
+      throw new UnauthorizedError(
+        "Authenticated user could not be found.",
+        "AUTH_USER_NOT_FOUND",
+      );
+    }
+
+    const safeUser = this.sanitizeUser(existingUser);
+
+    return {
+      user: {
+        id: safeUser.id,
+        name: safeUser.name,
+        email: safeUser.email,
+        role: safeUser.role,
+      },
     };
   }
 
@@ -152,8 +187,14 @@ export class AuthService {
     return safeUser;
   }
 
-  private generateToken(email: string) {
-    return jwt.sign({ sub: email }, env.jwtSecret, {
+  private generateToken(user: AuthUserRecord) {
+    const payload: AuthTokenPayload = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    return jwt.sign(payload, env.jwtSecret, {
       expiresIn: "7d",
     });
   }

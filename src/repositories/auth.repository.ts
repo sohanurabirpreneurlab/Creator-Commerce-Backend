@@ -1,4 +1,5 @@
 import { Pool } from "pg";
+import { UserRole } from "../constants/roles.js";
 import { AuthUser, AuthUserRecord } from "../interfaces/auth.interface.js";
 
 export class AuthRepository {
@@ -11,6 +12,7 @@ export class AuthRepository {
           id,
           name,
           email,
+          role,
           mobile_number,
           address,
           gender,
@@ -40,6 +42,7 @@ export class AuthRepository {
           id,
           name,
           email,
+          role,
           mobile_number,
           address,
           gender,
@@ -61,6 +64,34 @@ export class AuthRepository {
     return this.mapRowToAuthUserRecord(result.rows[0]);
   }
 
+  public async findById(id: string): Promise<AuthUserRecord | null> {
+    const result = await this.databasePool.query(
+      `
+        select
+          id,
+          name,
+          email,
+          role,
+          mobile_number,
+          address,
+          gender,
+          date_of_birth,
+          password_hash,
+          created_at
+        from public.users
+        where id = $1
+        limit 1
+      `,
+      [id],
+    );
+
+    if (result.rowCount === 0) {
+      return null;
+    }
+
+    return this.mapRowToAuthUserRecord(result.rows[0]);
+  }
+
   public async create(
     user: Omit<AuthUser, "id" | "createdAt"> & { passwordHash: string },
   ): Promise<AuthUserRecord> {
@@ -69,17 +100,19 @@ export class AuthRepository {
         insert into public.users (
           name,
           email,
+          role,
           mobile_number,
           address,
           gender,
           date_of_birth,
           password_hash
         )
-        values ($1, $2, $3, $4, $5, $6, $7)
+        values ($1, $2, $3, $4, $5, $6, $7, $8)
         returning
           id,
           name,
           email,
+          role,
           mobile_number,
           address,
           gender,
@@ -90,6 +123,7 @@ export class AuthRepository {
       [
         user.name,
         user.email,
+        user.role,
         user.mobileNumber,
         user.address,
         user.gender,
@@ -106,6 +140,7 @@ export class AuthRepository {
       id: String(row.id),
       name: String(row.name),
       email: String(row.email),
+      role: String(row.role) as UserRole,
       mobileNumber: String(row.mobile_number),
       address: String(row.address),
       gender: String(row.gender),

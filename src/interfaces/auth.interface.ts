@@ -1,3 +1,5 @@
+import { UserRole } from "../constants/roles.js";
+
 export interface BaseAuthPayload {
   password: string;
 }
@@ -19,6 +21,7 @@ export interface AuthUser {
   id: string;
   name: string;
   email: string;
+  role: UserRole;
   mobileNumber: string;
   address: string;
   gender: string;

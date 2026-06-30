@@ -1,3 +1,4 @@
+import { CurrentUser } from "../interfaces/current-user.interface.js";
 import { Request, Response } from "express";
 import { HTTP_STATUS } from "../constants/http-status.js";
 import { LoginPayload, SignUpPayload } from "../interfaces/auth.interface.js";
@@ -27,6 +28,19 @@ export class AuthController {
       response,
       HTTP_STATUS.OK,
       "Login successful.",
+      result,
+    );
+  };
+
+  public getCurrentUser = async (request: Request, response: Response) => {
+    const result = await this.authService.getCurrentUserProfile(
+      request.user as CurrentUser,
+    );
+
+    return sendSuccess(
+      response,
+      HTTP_STATUS.OK,
+      "Current user fetched successfully",
       result,
     );
   };
