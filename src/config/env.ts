@@ -24,10 +24,16 @@ function getPort() {
   return parsedPort;
 }
 
+function getOptionalEnvVariable(name: string) {
+  const value = process.env[name]?.trim();
+  return value ? value : undefined;
+}
+
 export const env = {
-  appName: "Creators Commerce Backend",
+  appName: "Creators Lab Backend",
   port: getPort(),
   databaseUrl: getRequiredEnvVariable("DATABASE_URL"),
   jwtSecret: getRequiredEnvVariable("JWT_SECRET"),
   frontendUrl: getRequiredEnvVariable("FRONTEND_URL"),
+  trackingBaseUrl: getOptionalEnvVariable("TRACKING_BASE_URL"),
 } as const;

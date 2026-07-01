@@ -9,7 +9,7 @@ export function sendSuccess<T>(
   statusCode: number,
   message: string,
   data: T,
-  meta?: Record<string, unknown>,
+  meta?: object,
 ) {
   const payload: ApiSuccessResponse<T> = {
     success: true,
